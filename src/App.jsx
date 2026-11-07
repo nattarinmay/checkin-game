@@ -117,7 +117,22 @@ function Admin({ settings, students, sessions, refresh }) {
   const [busy,setBusy] = useState(false)
   const fileRef = useRef(null)
   useEffect(()=>{supabase?.auth.getSession().then(({data})=>setSession(data.session)); const {data}=supabase?.auth.onAuthStateChange((_e,s)=>setSession(s))||{data:null};return()=>data?.subscription?.unsubscribe()},[])
-  useEffect(()=>{setTarget(String(settings.target_taps||100));setSuccessText(settings.success_message||'เช็คอินครบ 100% แล้ว!');setImageUrl(settings.image_url||'')},[settings])
+  useEffect(() => {
+  setTarget(String(settings.target_taps || 100))
+  setSuccessText(
+    settings.success_message || 'เช็คอินครบ 100% แล้ว!'
+  )
+
+  // อัปเดตรูปจากฐานข้อมูลเมื่อมี URL เท่านั้น
+  // ป้องกันการล้างรูปที่เพิ่งอัปโหลดแต่ยังไม่ได้บันทึก
+  if (settings.image_url) {
+    setImageUrl(settings.image_url)
+  }
+}, [
+  settings.target_taps,
+  settings.success_message,
+  settings.image_url
+])
   const login = async e => { e.preventDefault();setMessage('');const {error}=await supabase.auth.signInWithPassword({email,password});if(error)setMessage(errorText(error));else setMessage('เข้าสู่ระบบแล้ว') }
   const logout = async()=>{await supabase.auth.signOut();setSession(null)}
   const downloadTemplate = () => {
